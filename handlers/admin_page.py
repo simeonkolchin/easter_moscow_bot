@@ -26,12 +26,12 @@ async def admin_page(message: Message, state: FSMContext):
 @router.message(Command("get_people"))
 async def admin_call_people_(message: Message, state: FSMContext):
     admins = await sqlite_db.get_admins()
-    admins = [i[1] for i in admins]
-    if message.chat.id in admins:
+    admins = [int(i[1]) for i in admins]
+    if int(message.chat.id) in admins:
         await sqlite_db.get_people()
         from aiogram.types import FSInputFile
-        file = FSInputFile("event_people.xlsx")
-        await message.answer_document(file, caption="Вот список тех, кто зарегистрировался в боте:")
+        file = FSInputFile("people.xlsx")
+        await message.answer_document(file)
 
 @router.message(admin_state.create_admin)
 async def create_admin(message: Message, state: FSMContext):
