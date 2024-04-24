@@ -28,7 +28,7 @@ def video():
 
 def whathappenthere():
     builder = InlineKeyboardBuilder()
-    builder.row(types.InlineKeyboardButton(text=f"Как выглядит это событие🤩", callback_data="whathappenthere"), width=1)
+    builder.row(types.InlineKeyboardButton(text=f"Как выглядит это событие🤩", callback_data="w"), width=1)
     return builder
 
 

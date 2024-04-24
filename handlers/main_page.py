@@ -38,6 +38,21 @@ async def start(message: Message, bot: Bot):
         await bot.send_video(chat_id=message.chat.id, video=video_file, width=video_width, height=video_height)
         time.sleep(10)
         await message.answer(texts.text_2, reply_markup=keyboards.whathappenthere().as_markup())
+        time.sleep(10)
+        await bot.send_chat_action(chat_id=message.chat.id, action="typing")
+        media = [InputMediaPhoto(media=FSInputFile('files/1.jpg'), caption=texts.text_3)]
+        media.append(InputMediaPhoto(media=FSInputFile('files/2.jpg')))
+        media.append(InputMediaPhoto(media=FSInputFile('files/3.jpg')))
+        media.append(InputMediaPhoto(media=FSInputFile('files/4.jpg')))
+        media.append(InputMediaPhoto(media=FSInputFile('files/5.jpg')))
+        media.append(InputMediaPhoto(media=FSInputFile('files/6.jpg')))
+        await message.answer_media_group(media=media)
+        time.sleep(10)
+        await message.answer(texts.text_5, reply_markup=keyboards.text_5().as_markup())
+        time.sleep(4)
+        await message.answer(texts.text_6,
+                                      reply_markup=keyboards.get_start_keyboard().as_markup())
+        await sqlite_db.push_data_in_people(message.from_user.first_name, message.chat.id)
     else:
         await message.answer(f"{message.from_user.first_name}, чем я могу тебе помочь?",
                              reply_markup=keyboards.get_start_keyboard().as_markup())
@@ -45,28 +60,27 @@ async def start(message: Message, bot: Bot):
 
 @router.callback_query(F.data == "start")
 async def start_callback(callback: types.CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(texts.text_6,
-                                     reply_markup=keyboards.get_start_keyboard().as_markup())
+    await callback.message.edit_text(texts.text_6, reply_markup=keyboards.get_start_keyboard().as_markup())
     await state.clear()
 
 
-@router.callback_query(F.data == "whathappenthere")
-async def whathappenthere(callback: types.CallbackQuery, bot: Bot):
-    await bot.send_chat_action(chat_id=callback.message.chat.id, action="typing")
-    media = [InputMediaPhoto(media=FSInputFile('files/1.jpg'), caption=texts.text_3)]
-    media.append(InputMediaPhoto(media=FSInputFile('files/2.jpg')))
-    media.append(InputMediaPhoto(media=FSInputFile('files/3.jpg')))
-    media.append(InputMediaPhoto(media=FSInputFile('files/4.jpg')))
-    media.append(InputMediaPhoto(media=FSInputFile('files/5.jpg')))
-    media.append(InputMediaPhoto(media=FSInputFile('files/6.jpg')))
-    await callback.message.answer_media_group(media=media)
-    time.sleep(10)
-    await callback.message.answer(texts.text_5, reply_markup=keyboards.text_5().as_markup())
-    time.sleep(4)
-
-    await callback.message.answer(texts.text_6,
-                                  reply_markup=keyboards.get_start_keyboard().as_markup())
-    await sqlite_db.push_data_in_people(callback.message.from_user.first_name, callback.message.chat.id)
+# @router.callback_query(F.data == "whathappenthere")
+# async def whathappenthere(callback: types.CallbackQuery, bot: Bot):
+#     await bot.send_chat_action(chat_id=callback.message.chat.id, action="typing")
+#     media = [InputMediaPhoto(media=FSInputFile('files/1.jpg'), caption=texts.text_3)]
+#     media.append(InputMediaPhoto(media=FSInputFile('files/2.jpg')))
+#     media.append(InputMediaPhoto(media=FSInputFile('files/3.jpg')))
+#     media.append(InputMediaPhoto(media=FSInputFile('files/4.jpg')))
+#     media.append(InputMediaPhoto(media=FSInputFile('files/5.jpg')))
+#     media.append(InputMediaPhoto(media=FSInputFile('files/6.jpg')))
+#     await callback.message.answer_media_group(media=media)
+#     time.sleep(10)
+#     await callback.message.answer(texts.text_5, reply_markup=keyboards.text_5().as_markup())
+#     time.sleep(4)
+#
+#     await callback.message.answer(texts.text_6,
+#                                   reply_markup=keyboards.get_start_keyboard().as_markup())
+#     await sqlite_db.push_data_in_people(callback.from_user.first_name, callback.message.chat.id)
 
 
 @router.callback_query(F.data.startswith("question_"))
