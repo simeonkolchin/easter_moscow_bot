@@ -60,3 +60,17 @@ async def create_admin(person_id: int):
     '''Создаёт одного администратора по введённым данным'''
     cur.execute(f"INSERT INTO admins(person_id) VALUES ({person_id});")
     con.commit()
+
+
+async def get_people():
+    users = await get_users()
+    workbook = Workbook('people.xlsx')
+    worksheet = workbook.add_worksheet()
+    worksheet.write(0, 0, "№")
+    worksheet.write(0, 1, "id пользователя")
+    worksheet.write(0, 2, "Имя в телеграм")
+    for i, claim_id in enumerate(users):
+        worksheet.write(i + 1, 0, users[0][0])
+        worksheet.write(i + 1, 1, users[0][2])
+        worksheet.write(i + 1, 2, '' + (users[0][1] if users[0][1] != None else ''))
+    workbook.close()
