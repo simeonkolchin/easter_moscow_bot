@@ -48,8 +48,10 @@ async def start(message: Message, bot: Bot):
         media.append(InputMediaPhoto(media=FSInputFile('files/5.jpg')))
         media.append(InputMediaPhoto(media=FSInputFile('files/6.jpg')))
         await message.answer_media_group(media=media)
+        await bot.send_chat_action(chat_id=message.chat.id, action="typing")
         time.sleep(5)
         await message.answer(texts.text_5, reply_markup=keyboards.text_5().as_markup())
+        await bot.send_chat_action(chat_id=message.chat.id, action="typing")
         time.sleep(5)
         await message.answer(texts.text_6,
                                       reply_markup=keyboards.get_start_keyboard().as_markup())
