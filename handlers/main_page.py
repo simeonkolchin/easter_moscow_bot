@@ -36,10 +36,11 @@ async def start(message: Message, bot: Bot):
         await message.answer(f"Привет, {message.from_user.first_name}" + texts.text_1)
         await bot.send_chat_action(chat_id=message.chat.id, action="typing")
         await bot.send_video(chat_id=message.chat.id, video=video_file, width=video_width, height=video_height)
-        time.sleep(10)
+        time.sleep(3)
         await message.answer(texts.text_2, reply_markup=keyboards.whathappenthere().as_markup())
-        time.sleep(10)
         await bot.send_chat_action(chat_id=message.chat.id, action="typing")
+        time.sleep(5)
+        await sqlite_db.push_data_in_people(message.from_user.first_name, message.chat.id)
         media = [InputMediaPhoto(media=FSInputFile('files/1.jpg'), caption=texts.text_3)]
         media.append(InputMediaPhoto(media=FSInputFile('files/2.jpg')))
         media.append(InputMediaPhoto(media=FSInputFile('files/3.jpg')))
@@ -47,12 +48,11 @@ async def start(message: Message, bot: Bot):
         media.append(InputMediaPhoto(media=FSInputFile('files/5.jpg')))
         media.append(InputMediaPhoto(media=FSInputFile('files/6.jpg')))
         await message.answer_media_group(media=media)
-        time.sleep(10)
+        time.sleep(5)
         await message.answer(texts.text_5, reply_markup=keyboards.text_5().as_markup())
-        time.sleep(4)
+        time.sleep(5)
         await message.answer(texts.text_6,
                                       reply_markup=keyboards.get_start_keyboard().as_markup())
-        await sqlite_db.push_data_in_people(message.from_user.first_name, message.chat.id)
     else:
         await message.answer(f"{message.from_user.first_name}, чем я могу тебе помочь?",
                              reply_markup=keyboards.get_start_keyboard().as_markup())
