@@ -31,8 +31,8 @@ async def start(message: Message, bot: Bot):
     if not user:
         video_path = 'files/easter.mp4'
         video_file = FSInputFile(video_path)
-        video_width = 1280
-        video_height = 720
+        video_height = 1920
+        video_width = 1080
         await message.answer(f"Привет, {message.from_user.first_name}" + texts.text_1)
         await bot.send_chat_action(chat_id=message.chat.id, action="typing")
         await bot.send_video(chat_id=message.chat.id, video=video_file, width=video_width, height=video_height)

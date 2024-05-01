@@ -1,7 +1,7 @@
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command
-from aiogram import Router
+from aiogram import Router, Bot
 from aiogram.types import Message
 
 import config
@@ -12,6 +12,8 @@ router = Router()
 
 class admin_state(StatesGroup):
     create_admin = State()
+
+    send_massage_all = State()
 
 
 @router.message(Command("admin"))
@@ -32,6 +34,26 @@ async def admin_call_people_(message: Message, state: FSMContext):
         from aiogram.types import FSInputFile
         file = FSInputFile("people.xlsx")
         await message.answer_document(file)
+
+
+@router.message(Command("send_message_all"))
+async def admin_call_people_(message: Message, state: FSMContext):
+    admins = await sqlite_db.get_admins()
+    admins = [i[1] for i in admins]
+    if message.chat.id in admins:
+        await message.answer(f"Отправьте мне текст для общего сообщения:")
+        await state.set_state(admin_state.send_massage_all)
+
+
+@router.message(admin_state.send_massage_all)
+async def create_admin(message: Message, state: FSMContext, bot: Bot):
+    text = message.text
+    users = await sqlite_db.get_users()
+    for user in users:
+        await bot.send_message(user[2], text)
+    await message.answer(f"Сообщение отправлено!")
+    await state.clear()
+
 
 @router.message(admin_state.create_admin)
 async def create_admin(message: Message, state: FSMContext):
