@@ -4,6 +4,8 @@ from aiogram.types import FSInputFile, InputMediaPhoto
 from aiogram import Router, F, Bot, types
 from aiogram.filters import Command
 from aiogram.types import Message
+
+import config
 from handlers import keyboards
 import sqlite_db
 from files import questions as q
@@ -28,7 +30,7 @@ class main_state(StatesGroup):
 async def start(message: Message, bot: Bot):
     users = await sqlite_db.get_users()
     user = True if message.chat.id in [i[2] for i in users] else False
-    if not user:
+    if not user or (message.chat.id == config.admins[0]):
         video_path = 'files/easter.mp4'
         video_file = FSInputFile(video_path)
         video_height = 1920
