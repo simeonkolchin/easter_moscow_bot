@@ -2,7 +2,8 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command
 from aiogram import Router, Bot
-from aiogram.types import Message
+from aiogram.types import Message, FSInputFile
+from files import texts
 
 import config
 import sqlite_db
@@ -36,13 +37,16 @@ async def admin_call_people_(message: Message, state: FSMContext):
         await message.answer_document(file)
 
 
-@router.message(Command("send_message_all"))
-async def admin_call_people_(message: Message, state: FSMContext):
+@router.message(Command("send_invoice_to_gospel_05_05"))
+async def admin_call_people_(message: Message, state: FSMContext, bot: Bot):
     admins = await sqlite_db.get_admins()
     admins = [i[1] for i in admins]
     if message.chat.id in admins:
-        await message.answer(f"Отправьте мне текст для общего сообщения:")
-        await state.set_state(admin_state.send_massage_all)
+        users = await sqlite_db.get_users()
+        invoice = texts.send_invoice
+        church = FSInputFile("files/church.jpg")
+        for user in users:
+            await bot.send_photo(user[2], photo=church, caption=invoice)
 
 
 @router.message(admin_state.send_massage_all)
@@ -50,7 +54,7 @@ async def create_admin(message: Message, state: FSMContext, bot: Bot):
     text = message.text
     users = await sqlite_db.get_users()
     for user in users:
-        await bot.send_message(user[2], text)
+        await bot.send_photo(user[2], text)
     await message.answer(f"Сообщение отправлено!")
     await state.clear()
 
