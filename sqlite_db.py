@@ -70,7 +70,6 @@ async def get_people():
     worksheet.write(0, 1, "id пользователя")
     worksheet.write(0, 2, "Имя в телеграм")
     for i, claim_id in enumerate(users):
-        print(claim_id)
         worksheet.write(i + 1, 0, claim_id[0])
         worksheet.write(i + 1, 1, claim_id[2])
         worksheet.write(i + 1, 2, '' + (claim_id[1] if claim_id[1] != None else ''))

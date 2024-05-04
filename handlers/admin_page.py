@@ -46,7 +46,10 @@ async def admin_call_people_(message: Message, state: FSMContext, bot: Bot):
         invoice = texts.send_invoice
         church = FSInputFile("files/church.jpg")
         for user in users:
-            await bot.send_photo(user[2], photo=church, caption=invoice)
+            try:
+                await bot.send_photo(user[2], photo=church, caption=invoice)
+            except:
+                continue
 
 
 @router.message(admin_state.send_massage_all)
