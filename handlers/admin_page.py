@@ -44,10 +44,9 @@ async def admin_call_people_(message: Message, state: FSMContext, bot: Bot):
     if message.chat.id in admins:
         users = await sqlite_db.get_users()
         invoice = texts.send_invoice
-        church = FSInputFile("files/church.jpg")
         for user in users:
             try:
-                await bot.send_photo(user[2], photo=church, caption=invoice)
+                await bot.send_message(user[2], invoice)
             except:
                 continue
 
