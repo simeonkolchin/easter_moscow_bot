@@ -131,3 +131,20 @@ def reply_help(id):
     builder.row(types.InlineKeyboardButton(text="Ответить", callback_data=f"reply_help_{id}"),
                 width=1)
     return builder
+
+
+def send_invoice_edit_text():
+    builder = InlineKeyboardBuilder()
+    builder.row(types.InlineKeyboardButton(text="Добавить фото", callback_data=f"send_invoice_add_photo"),
+                types.InlineKeyboardButton(text="Изменить текст", callback_data=f"send_invoice_edit_text"),
+                types.InlineKeyboardButton(text="Отправить", callback_data=f"send_invoice_send_message"),
+                width=1)
+    return builder
+
+def send_invoice_edit_photo():
+    builder = InlineKeyboardBuilder()
+    builder.row(types.InlineKeyboardButton(text="Изменить фото", callback_data=f"send_invoice_add_photo"),
+                types.InlineKeyboardButton(text="Изменить текст", callback_data=f"send_invoice_edit_text"),
+                types.InlineKeyboardButton(text="Отправить", callback_data=f"send_invoice_send_message"),
+                width=1)
+    return builder

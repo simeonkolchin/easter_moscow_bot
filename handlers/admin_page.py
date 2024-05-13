@@ -1,12 +1,13 @@
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
+from aiogram.types import FSInputFile
+from aiogram import Router, F, Bot, types
 from aiogram.filters import Command
-from aiogram import Router, Bot
-from aiogram.types import Message, FSInputFile
-from files import texts
+from aiogram.types import Message
 
 import config
 import sqlite_db
+from handlers import keyboards
 
 router = Router()
 
@@ -15,6 +16,8 @@ class admin_state(StatesGroup):
     create_admin = State()
 
     send_massage_all = State()
+    send_photo_all = State()
+    send_massage_all_clear = State()
 
 
 @router.message(Command("admin"))
@@ -37,28 +40,92 @@ async def admin_call_people_(message: Message, state: FSMContext):
         await message.answer_document(file)
 
 
-@router.message(Command("send_invoice_to_gospel_05_05"))
+@router.message(Command("send_invoice_2024"))
 async def admin_call_people_(message: Message, state: FSMContext, bot: Bot):
     admins = await sqlite_db.get_admins()
     admins = [i[1] for i in admins]
     if message.chat.id in admins:
-        users = await sqlite_db.get_users()
-        invoice = texts.send_invoice
-        for user in users:
-            try:
-                await bot.send_message(user[2], invoice)
-            except:
-                continue
+        await message.answer_photo(photo=FSInputFile('files/style.webp'), caption="Отправьте мне текст для всех пользователей:")
+        await state.set_state(admin_state.send_massage_all)
+        await state.update_data(photo=0)
 
 
 @router.message(admin_state.send_massage_all)
-async def create_admin(message: Message, state: FSMContext, bot: Bot):
+async def send_massage_all(message: Message, state: FSMContext, bot: Bot):
     text = message.text
-    users = await sqlite_db.get_users()
-    for user in users:
-        await bot.send_photo(user[2], text)
-    await message.answer(f"Сообщение отправлено!")
-    await state.clear()
+    await state.update_data(text=text)
+    data = await state.get_data()
+    if data['photo']:
+        await message.answer_photo(photo=FSInputFile('files/send_photo_invoice.jpg'), caption=f"{data['text']}"
+                             f"\n\nВот ваш текст c картинкой. Выберите опцию:",
+                             reply_markup=keyboards.send_invoice_edit_photo().as_markup())
+    else:
+        await message.answer(f"{data['text']}"
+                         f"\n\nВот ваш текст. Выберите опцию:", reply_markup=keyboards.send_invoice_edit_text().as_markup())
+    await state.set_state(admin_state.send_massage_all_clear)
+
+
+@router.callback_query(F.data == "send_invoice_add_photo")
+async def send_invoice_add_photo(callback: types.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    if data['photo']:
+        await callback.message.edit_caption(caption=f"Текущее фото ☝️"
+                                                    f"\n\nОтправьте мне новую фотографию:")
+    else:
+        await callback.message.edit_text(f"Отправьте мне фотографию:")
+    await state.set_state(admin_state.send_photo_all)
+
+
+@router.message(admin_state.send_photo_all)
+async def send_photo_all(message: Message, state: FSMContext, bot: Bot):
+    await message.bot.download(file=message.photo[-1].file_id, destination='files/send_photo_invoice.jpg')
+    await state.update_data(photo=1)
+    data = await state.get_data()
+    if data['photo']:
+        await message.answer_photo(photo=FSInputFile('files/send_photo_invoice.jpg'), caption=f"{data['text']}"
+                             f"\n\nВот ваш текст c картинкой. Выберите опцию:",
+                             reply_markup=keyboards.send_invoice_edit_photo().as_markup())
+    else:
+        await message.answer(f"{data['text']}"
+                         f"\n\nВот ваш текст. Выберите опцию:", reply_markup=keyboards.send_invoice_edit_text().as_markup())
+    await state.set_state(admin_state.send_massage_all_clear)
+
+
+@router.callback_query(F.data == "send_invoice_edit_text")
+async def send_invoice_edit_text(callback: types.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    if data['photo']:
+        await callback.message.edit_caption(caption=f"Текущий текст:"
+                                         f"\n\n{data['text']}"
+                                         f"\n\nОтправьте мне новый текст:")
+    else:
+        await callback.message.edit_text(f"Текущий текст:"
+                                         f"\n\n{data['text']}"
+                                         f"\n\nОтправьте мне новый текст:")
+    await state.set_state(admin_state.send_massage_all)
+
+
+@router.callback_query(F.data == "send_invoice_send_message")
+async def send_invoice_send_message(callback: types.CallbackQuery, state: FSMContext, bot: Bot):
+    admins = await sqlite_db.get_admins()
+    admins = [i[1] for i in admins]
+    if callback.message.chat.id in admins:
+        data = await state.get_data()
+        if data['photo']:
+            await callback.message.edit_caption(caption=data['text'])
+        else:
+            await callback.message.edit_text(data['text'])
+        users = await sqlite_db.get_users()
+        for user in users:
+            try:
+                if data['photo']:
+                    await bot.send_photo(int(user[2]), photo=FSInputFile('files/send_photo_invoice.jpg'), caption=data['text'])
+                else:
+                    await bot.send_message(int(user[2]), data['text'])
+            except:
+                continue
+        await callback.message.answer(f"Сообщение отправлено!")
+        await state.clear()
 
 
 @router.message(admin_state.create_admin)
