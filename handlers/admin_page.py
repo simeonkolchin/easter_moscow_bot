@@ -110,6 +110,8 @@ async def send_invoice_send_message(callback: types.CallbackQuery, state: FSMCon
     admins = await sqlite_db.get_admins()
     admins = [i[1] for i in admins]
     if callback.message.chat.id in admins:
+        k = 0
+        k_close = 0
         data = await state.get_data()
         if data['photo']:
             await callback.message.edit_caption(caption=data['text'])
@@ -124,7 +126,9 @@ async def send_invoice_send_message(callback: types.CallbackQuery, state: FSMCon
                     await bot.send_message(int(user[2]), data['text'])
             except:
                 continue
-        await callback.message.answer(f"Сообщение отправлено!")
+        await callback.message.answer(f"Сообщение отправлено!"
+                                      f"\n\nСообщение доставлено: {k} чел."
+                                      f"\nПользователь заблокировал бота: {k_close} чел.")
         await state.clear()
 
 
